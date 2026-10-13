@@ -10,7 +10,7 @@ const FAQAccordion = () => {
       answer: "Our AI models achieve 92% accuracy by analyzing 50+ data points specific to Mumbai's food service market, including neighborhood demographics, foot traffic patterns, seasonal trends, and local competition. We continuously update our models with real-world data from Mumbai restaurants."
     },
     {
-      question: "What Mumbai areas does CodeShinobi cover?",
+      question: "What Mumbai areas does OriginBite cover?",
       answer: "We provide comprehensive analysis for all major Mumbai areas including Bandra, Juhu, Colaba, Dadar, Powai, Lower Parel, Andheri, Malad, Borivali, and 40+ other neighborhoods. Our database includes granular data at the pin-code level for hyper-local insights."
     },
     {
@@ -43,7 +43,7 @@ const FAQAccordion = () => {
             Frequently Asked Questions
           </h2>
           <p className="text-base md:text-lg text-muted-foreground">
-            Everything you need to know about CodeShinobi's Mumbai restaurant analytics
+            Everything you need to know about OriginBite's Mumbai restaurant analytics
           </p>
         </div>
 

@@ -10,10 +10,12 @@ import SubscriptionFAQ from './components/SubscriptionFAQ';
 import TrustSignals from './components/TrustSignals';
 import Icon from '../../components/AppIcon';
 
+import { getPlan, writeLocal } from '../../lib/storage';
+
 const SubscriptionTiers = () => {
   const navigate = useNavigate();
   const [isYearly, setIsYearly] = useState(false);
-  const [currentPlan] = useState('free');
+  const [currentPlan, setCurrentPlan] = useState(() => getPlan().tier.toLowerCase());
 
   const plans = [
     {
@@ -119,6 +121,7 @@ const SubscriptionTiers = () => {
   ];
 
   const handleUpgrade = (plan) => {
+    if (!plan?.isPro) { writeLocal('subscription', { tier: 'Free' }); setCurrentPlan('free'); }
     if (plan?.isPro) {
       navigate('/payment-processing', { state: { plan, isYearly } });
     }
@@ -144,7 +147,7 @@ const SubscriptionTiers = () => {
           <div className="max-w-7xl mx-auto space-y-8 md:space-y-12">
             <div className="text-center space-y-4">
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">
-                Choose Your Plan
+                Choose Your Plan · Test Mode
               </h2>
               <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
                 Unlock powerful AI-driven insights to dominate Mumbai's competitive restaurant market
@@ -197,14 +200,14 @@ const SubscriptionTiers = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a 
-                  href="mailto:support@codeshinobi.com"
+                  href="/help"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors duration-250"
                 >
                   <Icon name="Mail" size={20} />
                   <span>Email Support</span>
                 </a>
                 <a 
-                  href="tel:+912212345678"
+                  href="/help"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-card text-foreground border border-border rounded-lg font-medium hover:bg-muted transition-colors duration-250"
                 >
                   <Icon name="Phone" size={20} />
@@ -219,10 +222,10 @@ const SubscriptionTiers = () => {
           <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <p className="text-sm text-muted-foreground text-center md:text-left">
-                © {new Date()?.getFullYear()} CodeShinobi. All rights reserved.
+                © {new Date()?.getFullYear()} OriginBite. All rights reserved.
               </p>
               <div className="flex items-center gap-6">
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-250">
+                <a href="/help" className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-250">
                   Terms of Service
                 </a>
                 <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-250">

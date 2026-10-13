@@ -34,7 +34,7 @@ const CTASection = () => {
         </h2>
 
         <p className="text-base md:text-lg lg:text-xl text-white/90 mb-8 md:mb-10 lg:mb-12 max-w-3xl mx-auto">
-          Start your free analysis today and discover why Mumbai's smartest restaurateurs trust CodeShinobi for location intelligence and revenue predictions.
+          Start your free analysis today and discover why Mumbai's smartest restaurateurs trust OriginBite for location intelligence and revenue predictions.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

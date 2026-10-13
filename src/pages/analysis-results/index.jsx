@@ -42,6 +42,10 @@ const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
   return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 };
 
+import { getReports } from '../../lib/storage';
+import { exportCSV, exportPDF } from '../../lib/exports';
+import { revenueProjection } from '../../lib/scoring';
+
 const AnalysisResults = () => {
   const navigate = useNavigate();
   const locationHook = useLocation();
@@ -49,8 +53,9 @@ const AnalysisResults = () => {
   const [isSidebarCollapsed] = useState(false);
 
   // ✅ read analysis result coming from NewAnalysis page
-  const analysisInput = locationHook?.state?.analysisInput || null;
-  const analysisResult = locationHook?.state?.analysisResult || null;
+  const report = useMemo(() => locationHook.state?.analysisResult ? locationHook.state : getReports()[0] || null, [locationHook.state]);
+  const analysisInput = report?.analysisInput || null;
+  const analysisResult = report?.analysisResult || null;
 
   // ✅ If user directly opens /analysis-results without submitting form
   useEffect(() => {
@@ -72,8 +77,8 @@ const AnalysisResults = () => {
       location: {
         area: analysisInput?.location || "Unknown",
         city: "Mumbai",
-        lat: 19.076, // fallback Mumbai coordinates
-        lng: 72.8777,
+        lat: analysisResult?.coordinates?.lat || 19.076, // fallback Mumbai coordinates
+        lng: analysisResult?.coordinates?.lng || 72.8777,
       },
       demographics: {
         footTraffic: "N/A",
@@ -97,8 +102,8 @@ const AnalysisResults = () => {
       location: {
         area: analysisResult?.locality || analysisInput?.location || "Unknown",
         city: "Mumbai",
-        lat: 19.076,
-        lng: 72.8777,
+        lat: analysisResult?.coordinates?.lat || 19.076,
+        lng: analysisResult?.coordinates?.lng || 72.8777,
       },
 
       demographics: {
@@ -135,8 +140,6 @@ const AnalysisResults = () => {
 
     const init = async () => {
       try {
-        console.log("SUPABASE URL:", import.meta.env.VITE_SUPABASE_URL);
-        console.log("SUPABASE KEY exists?:", !!import.meta.env.VITE_SUPABASE_ANON_KEY);
 
         setRestaurantsLoading(true);
         const rows = await loadRestaurants();
@@ -268,35 +271,8 @@ const AnalysisResults = () => {
     { category: "Beverages", yourPrice: 80, competitorAvg: 95 },
   ];
 
-  const revenueData = [
-    { month: "Jan", revenue: 450000 },
-    { month: "Feb", revenue: 520000 },
-    { month: "Mar", revenue: 580000 },
-    { month: "Apr", revenue: 620000 },
-    { month: "May", revenue: 680000 },
-    { month: "Jun", revenue: 720000 },
-    { month: "Jul", revenue: 650000 },
-    { month: "Aug", revenue: 690000 },
-    { month: "Sep", revenue: 750000 },
-    { month: "Oct", revenue: 820000 },
-    { month: "Nov", revenue: 880000 },
-    { month: "Dec", revenue: 950000 },
-  ];
-
-  const monsoonData = [
-    { month: "Jan", revenue: 450000 },
-    { month: "Feb", revenue: 520000 },
-    { month: "Mar", revenue: 580000 },
-    { month: "Apr", revenue: 620000 },
-    { month: "May", revenue: 680000 },
-    { month: "Jun", revenue: 580000 },
-    { month: "Jul", revenue: 520000 },
-    { month: "Aug", revenue: 550000 },
-    { month: "Sep", revenue: 680000 },
-    { month: "Oct", revenue: 820000 },
-    { month: "Nov", revenue: 880000 },
-    { month: "Dec", revenue: 950000 },
-  ];
+  const revenueData = revenueProjection(analysisInput, analysisResult);
+  const monsoonData = revenueData.map((row, index) => ({ ...row, revenue: Math.round(row.revenue * (index >= 5 && index <= 8 ? .8 : 1)) }));
 
   // ✅ Convert backend keyFactors into "recommendations" UI format (simple + honest)
   const recommendations = useMemo(() => {
@@ -350,7 +326,7 @@ const AnalysisResults = () => {
   }
 
   // 2) Competition Strategy
-  if (comp >= 70 || cuisineCount >= 8) {
+  if (comp <= 40 || cuisineCount >= 8) {
     recs.push({
       category: "Menu",
       title: "Differentiate Menu to Beat High Competition",
@@ -461,15 +437,8 @@ const AnalysisResults = () => {
   /** ---------------------------
    * Export actions
    --------------------------- */
-  const handleExportPDF = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log("Exporting PDF report...");
-  };
-
-  const handleExportCSV = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log("Exporting CSV data...");
-  };
+  const handleExportPDF = () => exportPDF(report);
+  const handleExportCSV = () => exportCSV(report);
 
   const handleUpgrade = () => navigate("/subscription-tiers");
   const handleNewAnalysis = () => navigate("/new-analysis");
@@ -490,6 +459,7 @@ const AnalysisResults = () => {
         </header>
 
         <main className="px-4 md:px-6 lg:px-8 py-6 md:py-8 space-y-6">
+          <p className="demo-notice">Dataset-based planning score · Revenue charts are illustrative scenarios, not guaranteed returns. Map tiles require an internet connection.</p>
           <SuccessProbabilityCard
             probability={analysisData.probability}
             riskLevel={analysisData.riskLevel}
@@ -533,7 +503,7 @@ const AnalysisResults = () => {
           <div className="px-4 md:px-6 lg:px-8 py-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <p className="text-sm text-muted-foreground">
-                &copy; {new Date().getFullYear()} CodeShinobi. All rights reserved.
+                &copy; {new Date().getFullYear()} OriginBite. All rights reserved.
               </p>
               <div className="flex items-center gap-6">
                 <a href="#privacy" className="text-sm text-muted-foreground hover:text-foreground">

@@ -48,8 +48,8 @@ const CompetitorPricingChart = ({ pricingData }) => {
               wrapperStyle={{ fontSize: '14px' }}
               iconType="circle"
             />
-            <Bar dataKey="yourPrice" fill="#701C1C" name="Your Price" radius={[8, 8, 0, 0]} />
-            <Bar dataKey="competitorAvg" fill="#D4A574" name="Competitor Average" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="yourPrice" fill="#18503F" name="Your Price" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="competitorAvg" fill="#BB8A46" name="Competitor Average" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

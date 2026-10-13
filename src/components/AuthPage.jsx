@@ -1,121 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../styles/AuthPage.css';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { getDemoUser, writeLocal } from '../lib/storage';
+import Icon from './AppIcon';
 
-const AuthPage = () => {
+export default function AuthPage() {
   const navigate = useNavigate();
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: ''
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) navigate('/user-dashboard');
-    };
-    checkUser();
-  }, [navigate]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const [signup, setSignup] = useState(false);
+  const [form, setForm] = useState({ name: getDemoUser().name === 'Explorer' ? '' : getDemoUser().name, email: '', password: '' });
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  async function submit(e) {
+    e.preventDefault(); setBusy(true); setError(''); setMessage('');
     try {
-      if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: { data: { first_name: formData.firstName, last_name: formData.lastName } }
-        });
-        if (error) throw error;
-        alert("Check your email for verification!");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
-        if (error) throw error;
-        navigate('/user-dashboard');
-      }
-    } catch (err) {
-      setErrors({ general: err.message });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="auth-container">
-      <div className="auth-background">
-        <div className="gradient-orb orb-1"></div>
-        <div className="gradient-orb orb-2"></div>
-        <div className="gradient-orb orb-3"></div>
-      </div>
-
-      <div className="auth-content">
-        <div className="auth-card">
-          <div className="auth-header">
-            <h1 className="auth-title">{isSignUp ? 'Create Account' : 'Welcome Back'}</h1>
-            <p className="auth-subtitle">
-              {isSignUp ? 'Sign up to get started' : 'Sign in to continue'}
-            </p>
-          </div>
-
-          {errors.general && <div className="error-message">{errors.general}</div>}
-
-          <form onSubmit={handleSubmit} className="auth-form">
-            {isSignUp && (
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">First Name</label>
-                  <input name="firstName" type="text" className="form-input" onChange={handleInputChange} placeholder="John" />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Last Name</label>
-                  <input name="lastName" type="text" className="form-input" onChange={handleInputChange} placeholder="Doe" />
-                </div>
-              </div>
-            )}
-
-            <div className="form-group">
-              <label className="form-label">Email</label>
-              <input name="email" type="email" className="form-input" onChange={handleInputChange} placeholder="you@example.com" />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input name="password" type="password" className="form-input" onChange={handleInputChange} placeholder="••••••••" />
-            </div>
-
-            <button type="submit" className="submit-btn" disabled={isLoading}>
-              {isLoading ? <span className="loader"></span> : (isSignUp ? 'Create Account' : 'Sign In')}
-            </button>
-          </form>
-
-          <div className="toggle-section">
-            <p className="toggle-text">
-              {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-              <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="toggle-btn">
-                {isSignUp ? 'Sign In' : 'Sign Up'}
-              </button>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default AuthPage;
+      if (!supabase) { writeLocal('profile', { name: form.name.trim() || 'Explorer', email: '' }); navigate('/user-dashboard'); return; }
+      const result = signup ? await supabase.auth.signUp({ email: form.email, password: form.password, options: { data: { first_name: form.name } } }) : await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
+      if (result.error) throw result.error;
+      if (signup && !result.data.session) setMessage('Check your email to confirm your account, then sign in.');
+      else navigate('/user-dashboard');
+    } catch (e) { setError(e.message); } finally { setBusy(false); }
+  }
+  return <main className="auth-view"><Link to="/" className="brand"><Icon name="ChefHat" />OriginBite</Link><div className="auth-grid"><section><p className="eyebrow">A BETTER START FOR YOUR NEXT BIG IDEA</p><h1>Your restaurant journey<br /><em>starts here.</em></h1><p>Explore the neighbourhood. Understand the competition. Build with confidence.</p><div className="auth-facts"><span><Icon name="MapPin" />Mumbai insights</span><span><Icon name="BarChart3" />Saved reports</span><span><Icon name="NotebookPen" />Business plans</span></div></section><section className="surface p-8 md:p-10"><h2 className="text-3xl mb-2">{!supabase ? 'Create your local workspace' : signup ? 'Create account' : 'Welcome back'}</h2><p className="text-muted-foreground mb-6">{!supabase ? 'Demo profile · no account or password required. Your work stays in this browser.' : 'Sign in to your OriginBite account.'}</p><form onSubmit={submit} className="space-y-5">
+    {(!supabase || signup) && <label className="field-label">Your name<input required maxLength={60} autoComplete="given-name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="field" placeholder="What should we call you?" /></label>}
+    {supabase && <><label className="field-label">Email address<input className="field" required type="email" autoComplete="email" value={form.email} onChange={e => setForm({...form,email:e.target.value})} /></label><label className="field-label">Password<input className="field" required minLength={6} type="password" autoComplete={signup ? 'new-password' : 'current-password'} value={form.password} onChange={e => setForm({...form,password:e.target.value})} /></label></>}
+    {error && <p role="alert" className="text-red-700">{error}</p>}{message && <p role="status" className="text-primary">{message}</p>}
+    <button disabled={busy} className="action w-full">{busy ? 'Please wait…' : !supabase ? 'Enter workspace →' : signup ? 'Create account' : 'Sign in'}</button>
+    {supabase && <button type="button" className="text-primary w-full text-sm" onClick={() => setSignup(!signup)}>{signup ? 'Already have an account? Sign in' : 'New here? Create an account'}</button>}
+  </form><Link to="/" className="block text-center text-sm mt-6 text-muted-foreground">← Back to homepage</Link></section></div></main>;
+}

@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Select from "../../../components/ui/Select";
 import Icon from "../../../components/AppIcon";
-import { supabase } from "../../../lib/supabase";
+import { getLocations } from "../../../lib/localData";
 
 const LocationSelector = ({ value, onChange, error }) => {
   const [loading, setLoading] = useState(false);
   const [localityOptions, setLocalityOptions] = useState([]);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     let mounted = true;
@@ -14,12 +15,7 @@ const LocationSelector = ({ value, onChange, error }) => {
       try {
         setLoading(true);
 
-        const { data, error } = await supabase
-          .from("localities")
-          .select("locality")
-          .order("locality", { ascending: true });
-
-        if (error) throw error;
+        const data = (await getLocations()).map(locality => ({ locality }));
 
         const options =
           (data || [])
@@ -34,6 +30,7 @@ const LocationSelector = ({ value, onChange, error }) => {
         if (!mounted) return;
         setLocalityOptions(options);
       } catch (err) {
+        if (mounted) setLoadError(err.message);
         console.error("Failed to load localities:", err);
         if (mounted) setLocalityOptions([]);
       } finally {
@@ -68,7 +65,7 @@ const LocationSelector = ({ value, onChange, error }) => {
         onChange={onChange}
         placeholder={placeholderText}
         description="Select the Mumbai locality where you plan to open your restaurant (dataset-powered)"
-        error={error}
+        error={error || loadError}
         required
         searchable
         className="w-full"

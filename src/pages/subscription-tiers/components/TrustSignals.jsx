@@ -33,7 +33,7 @@ const TrustSignals = () => {
     location: 'Lower Parel',
     image: "https://img.rocket.new/generatedImages/rocket_gen_img_12b9c2bb3-1763293370864.png",
     imageAlt: 'Professional Indian man with short black hair wearing navy blue suit and white shirt with warm smile',
-    quote: 'The revenue predictions were spot-on. I expanded to Juhu based on CodeShinobi\'s analysis and we\'re already profitable.',
+    quote: 'The revenue predictions were spot-on. I expanded to Juhu based on OriginBite\'s analysis and we\'re already profitable.',
     rating: 5
   }];
 

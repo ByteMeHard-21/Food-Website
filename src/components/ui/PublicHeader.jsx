@@ -132,7 +132,7 @@ const PublicHeader = () => {
               className="public-header-logo-text"
               style={{ letterSpacing: '-0.03em', fontWeight: 600 }}
             >
-              OriginEats
+              OriginBite
             </span>
           </Link>
 

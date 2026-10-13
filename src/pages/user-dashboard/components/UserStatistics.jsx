@@ -3,29 +3,34 @@ import { useNavigate } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
+import { getReports } from '../../../lib/storage';
+
 const UserStatistics = ({ subscriptionTier = 'Free' }) => {
   const navigate = useNavigate();
 
+  const reports = getReports();
+  const best = [...reports].sort((a,b)=>b.analysisResult.successRate-a.analysisResult.successRate)[0];
+  const avg = reports.length ? Math.round(reports.reduce((n,r)=>n+r.analysisResult.successRate,0)/reports.length) : 0;
   const stats = [
     {
       icon: 'BarChart3',
       label: 'Total Analyses',
-      value: '5',
-      description: 'Completed this month',
+      value: String(reports.length),
+      description: 'Saved on this device',
       color: 'text-primary'
     },
     {
       icon: 'Target',
-      label: 'Avg Success Rate',
-      value: '73%',
+      label: 'Avg Planning Score',
+      value: avg + '/100',
       description: 'Across all analyses',
       color: 'text-success'
     },
     {
       icon: 'TrendingUp',
       label: 'Best Location',
-      value: 'Colaba',
-      description: '82% success probability',
+      value: best?.analysisInput.location || '—',
+      description: best ? best.analysisResult.successRate + '/100 planning score' : 'Run your first analysis',
       color: 'text-accent'
     }
   ];
@@ -67,7 +72,7 @@ const UserStatistics = ({ subscriptionTier = 'Free' }) => {
       </div>
       {/* Upgrade Prompt for Free Users */}
       {subscriptionTier === 'Free' && (
-        <div className="bg-gradient-to-r from-primary to-[#8B2424] rounded-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-primary to-[#28765B] rounded-lg p-6 text-white">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">

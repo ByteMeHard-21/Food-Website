@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import 'leaflet/dist/leaflet.css';
 import AuthenticatedSidebar from "../../components/ui/AuthenticatedSidebar";
 import NavigationBreadcrumbs from "../../components/ui/NavigationBreadcrumbs";
@@ -9,11 +9,18 @@ import AnalysisForm from "./components/AnalysisForm";
 import ContextualGuidance from "./components/ContextualGuidance";
 import Icon from "../../components/AppIcon";
 
+import { runAnalysis, analyzeLocally } from '../../lib/localData';
+import { saveReport } from '../../lib/storage';
+import { supabase } from '../../lib/supabase';
+
 const NewAnalysis = () => {
+  const route = useLocation();
+  const [preview, setPreview] = useState(null);
+  const [submitError, setSubmitError] = useState('');
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(route.state?.analysisInput || {
     location: "",
     cuisine: "",
     budget: 2500000, // ₹25 Lakhs
@@ -26,6 +33,14 @@ const NewAnalysis = () => {
     cuisine: "",
     budget: "",
   });
+
+  useEffect(() => {
+    let active = true;
+    if (formData.location && formData.cuisine && !supabase) {
+      analyzeLocally(formData).then(data => { if (active) setPreview(data); }).catch(() => { if (active) setPreview(null); });
+    } else setPreview(null);
+    return () => { active = false; };
+  }, [formData]);
 
   const handleFieldChange = (field, value) => {
     setFormData((prev) => ({
@@ -59,48 +74,13 @@ const NewAnalysis = () => {
     setIsLoading(true);
 
     try {
-      const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-      const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-        throw new Error("Supabase env missing: VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY");
-      }
-
-      const endpoint = `${SUPABASE_URL}/functions/v1/analyze`;
-
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
-          locality: formData.location,
-          cuisine: formData.cuisine,
-          budgetLakhs: formData.budget / 100000,
-          nearMetro: formData.metroAccess,
-          openingTimeline: formData.timeline,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        console.error("Edge function failed:", data);
-        throw new Error(data?.error || "Edge function returned error");
-      }
-
-      navigate("/analysis-results", {
-        state: {
-          analysisInput: formData,
-          analysisResult: data,
-          timestamp: new Date().toISOString(),
-        },
-      });
+      setSubmitError('');
+      const data = await runAnalysis(formData);
+      const report = saveReport(formData, data);
+      navigate('/analysis-results', { state: report });
     } catch (err) {
       console.error("Analysis error:", err);
-      alert(err?.message || "Analysis failed. Please try again.");
+      setSubmitError(err?.message || "Analysis failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -127,6 +107,8 @@ const NewAnalysis = () => {
 
         <main className="px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
           <div className="max-w-7xl mx-auto">
+            {submitError && <p role="alert" className="mb-5 rounded-lg bg-red-50 p-4 text-red-800">{submitError}</p>}
+            {!supabase && <p className="demo-notice">Local dataset mode · Results are planning estimates from the bundled Mumbai dataset. Reports stay in this browser.</p>}
             <div className="mb-6 md:mb-8 lg:hidden">
               <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
                 New Restaurant Analysis
@@ -187,6 +169,7 @@ const NewAnalysis = () => {
                     location={formData?.location}
                     cuisine={formData?.cuisine}
                     budget={formData?.budget}
+                    analysisResult={preview}
                   />
                 </div>
               </div>
@@ -202,8 +185,7 @@ const NewAnalysis = () => {
                     Your Data is Secure
                   </h3>
                   <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
-                    All analysis parameters are encrypted and stored securely. We never share your
-                    business plans or financial information with third parties.
+                    Reports are saved in this browser. Avoid entering sensitive business information on a shared device.
                   </p>
                 </div>
               </div>

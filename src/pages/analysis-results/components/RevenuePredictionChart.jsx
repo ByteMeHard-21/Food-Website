@@ -73,9 +73,9 @@ const RevenuePredictionChart = ({ revenueData, monsoonData }) => {
             <Line
               type="monotone"
               dataKey="revenue"
-              stroke="#701C1C"
+              stroke="#18503F"
               strokeWidth={3}
-              dot={{ fill: '#701C1C', r: 4 }}
+              dot={{ fill: '#18503F', r: 4 }}
               activeDot={{ r: 6 }}
               name="Projected Revenue"
             />

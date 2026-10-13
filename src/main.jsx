@@ -1,7 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
-import './styles/tailwind.css' // Or './styles/index.css' - whichever holds your tailwind imports!
+import './styles/tailwind.css'
+import './styles/index.css'
+import 'leaflet/dist/leaflet.css'
+import './styles/originbite.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

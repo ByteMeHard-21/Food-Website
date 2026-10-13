@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
-const COLORS = ["#701C1C", "#D4A574", "#F0EAD6", "#A8A29E", "#57534E", "#2f2f2f"];
+const COLORS = ["#18503F", "#BB8A46", "#E5EBDD", "#A8A29E", "#57534E", "#2f2f2f"];
 
 const CuisineDemandChart = ({ demandData }) => {
   const safeData = useMemo(() => (Array.isArray(demandData) ? demandData : []), [demandData]);

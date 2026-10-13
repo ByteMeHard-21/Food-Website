@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getDemoUser, getPlan } from '../../lib/storage';
 import { supabase } from '../../lib/supabase';
 import AuthenticatedSidebar from '../../components/ui/AuthenticatedSidebar';
 import NavigationBreadcrumbs from '../../components/ui/NavigationBreadcrumbs';
@@ -11,13 +12,14 @@ import UserStatistics from './components/UserStatistics';
 
 const UserDashboard = () => {
   const [userData, setUserData] = useState({
-    firstName: 'User',
+    firstName: getDemoUser().name,
     lastName: '',
-    subscriptionTier: 'Free'
+    subscriptionTier: getPlan().tier
   });
 
   useEffect(() => {
     const fetchUser = async () => {
+      if (!supabase) return;
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserData({
@@ -47,7 +49,7 @@ const UserDashboard = () => {
       description: "Explore current Mumbai restaurant market trends and seasonal patterns",
       icon: "TrendingUp",
       actionText: "View Trends",
-      route: "/analysis-results",
+      route: "/user-dashboard#market-trends",
       variant: "secondary"
     }
   ];

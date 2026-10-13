@@ -38,7 +38,7 @@ const OrderSummary = ({ selectedPlan, billingCycle }) => {
       <div className="space-y-4 mb-6 pb-6 border-b border-border">
         <div className="flex items-start justify-between">
           <div>
-            <p className="font-medium text-foreground">CodeShinobi Pro</p>
+            <p className="font-medium text-foreground">OriginBite Pro</p>
             <p className="text-sm text-muted-foreground capitalize">{billingCycle} Subscription</p>
           </div>
           <p className="font-semibold text-foreground">{formatIndianCurrency(plan?.price)}</p>

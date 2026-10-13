@@ -68,8 +68,8 @@ module.exports = {
         xl: 'var(--radius-xl)', /* 24px */
       },
       fontFamily: {
-        heading: ['Crimson Text', 'serif'],
-        body: ['Source Sans 3', 'sans-serif'],
+        heading: ['Lora', 'serif'],
+        body: ['DM Sans', 'sans-serif'],
         caption: ['Karla', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },

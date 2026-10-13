@@ -1,3 +1,10 @@
+# OriginEats local setup
+
+Read [OriginEats.md](./OriginEats.md) for the complete project PRD and agent handoff: every page and Business Studio tab, user journeys, feature internals, scoring formulas, API/data contracts, implementation status, and remaining work. The current website brand is **OriginBite**.
+
+See [LOCAL_SETUP.md](./LOCAL_SETUP.md) for the blank-screen fix, `.env` values,
+Supabase database/function prerequisites, and local run instructions.
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

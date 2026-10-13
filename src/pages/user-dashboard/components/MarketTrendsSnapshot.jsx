@@ -44,10 +44,10 @@ const MarketTrendsSnapshot = () => {
   ];
 
   return (
-    <div className="bg-card border border-border rounded-lg p-4 md:p-6 lg:p-8">
+    <div id="market-trends" className="bg-card border border-border rounded-lg p-4 md:p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl md:text-2xl font-semibold text-foreground">
-          Mumbai Market Trends
+          Mumbai Market Trends · Sample
         </h2>
         <Icon name="Activity" size={24} className="text-primary" />
       </div>

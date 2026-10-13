@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Select from "../../../components/ui/Select";
 import Icon from "../../../components/AppIcon";
-import { supabase } from "../../../lib/supabase";
+import { getCuisines } from "../../../lib/localData";
 
 const CuisineSelector = ({ value, onChange, error }) => {
   const [loading, setLoading] = useState(false);
   const [cuisineOptions, setCuisineOptions] = useState([]);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     let mounted = true;
@@ -15,12 +16,7 @@ const CuisineSelector = ({ value, onChange, error }) => {
         setLoading(true);
 
         // ✅ Pull cuisines from computed stats table (best source of truth)
-        const { data, error } = await supabase
-          .from("cuisine_locality_stats")
-          .select("category")
-          .order("category", { ascending: true });
-
-        if (error) throw error;
+        const data = (await getCuisines()).map(category => ({ category }));
 
         // Unique categories
         const unique = Array.from(
@@ -36,6 +32,7 @@ const CuisineSelector = ({ value, onChange, error }) => {
         if (!mounted) return;
         setCuisineOptions(options);
       } catch (err) {
+        if (mounted) setLoadError(err.message);
         console.error("Failed to load cuisines:", err);
         if (mounted) setCuisineOptions([]);
       } finally {
@@ -70,7 +67,7 @@ const CuisineSelector = ({ value, onChange, error }) => {
         onChange={onChange}
         placeholder={placeholderText}
         description="Select the primary cuisine type for your restaurant (dataset-powered)"
-        error={error}
+        error={error || loadError}
         required
         searchable
         className="w-full"

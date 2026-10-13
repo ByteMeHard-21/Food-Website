@@ -21,7 +21,7 @@ const WelcomeSection = ({ userName }) => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-primary to-[#8B2424] rounded-xl p-6 md:p-8 lg:p-10 text-white shadow-warm-lg">
+    <div className="bg-gradient-to-r from-primary to-[#28765B] rounded-xl p-6 md:p-8 lg:p-10 text-white shadow-warm-lg">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex-1">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">
